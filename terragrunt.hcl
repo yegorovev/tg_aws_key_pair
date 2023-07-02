@@ -4,7 +4,7 @@ terraform {
 
 
 locals {
-  common      = read_terragrunt_config(find_in_parent_folders("common.hcl")).common
+  common      = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.common
   env         = local.common.env
   profile     = local.common.profile
   region      = local.common.region
@@ -13,7 +13,7 @@ locals {
   key         = join("/", [local.common.key, "key_pair/terraform.tfstate"])
   common_tags = jsonencode(local.common.tags)
 
-  kp              = read_terragrunt_config(find_in_parent_folders("common.hcl")).key_pair
+  kp              = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.key_pair
   algorithm       = try(local.kp.algorithm, "RSA")
   rsa_bits        = try(local.kp.rsa_bits, 4096)
   key_name_prefix = local.kp.key_name_prefix
