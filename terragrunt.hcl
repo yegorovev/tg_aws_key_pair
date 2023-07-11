@@ -4,21 +4,22 @@ terraform {
 
 
 locals {
-  common      = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.common
-  env         = local.common.env
-  profile     = local.common.profile
-  region      = local.common.region
-  bucket_name = local.common.bucket_name
-  lock_table  = local.common.lock_table
-  key         = join("/", [local.common.key, "key_pair/terraform.tfstate"])
+  common  = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.common
+  env     = local.common.env
+  profile = local.common.profile
+  region  = local.common.region
+
   common_tags = jsonencode(local.common.tags)
 
-  kp              = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.key_pair
-  algorithm       = try(local.kp.algorithm, "RSA")
-  rsa_bits        = try(local.kp.rsa_bits, 4096)
-  key_name_prefix = local.kp.key_name_prefix
-  local_path      = try(local.kp.local_path, get_terragrunt_dir())
-  tags            = local.kp.tags
+  kp                         = read_terragrunt_config(find_in_parent_folders("common.hcl")).inputs.key_pair
+  kp_lock_table_remote_state = local.kp.kp_lock_table_remote_state
+  kp_key_remote_state        = local.kp.kp_key_remote_state
+  kp_backet_remote_state     = local.kp.kp_backet_remote_state
+  algorithm                  = try(local.kp.algorithm, "RSA")
+  rsa_bits                   = try(local.kp.rsa_bits, 4096)
+  key_name_prefix            = local.kp.key_name_prefix
+  local_path                 = try(local.kp.local_path, get_terragrunt_dir())
+  tags                       = local.kp.tags
 }
 
 remote_state {
@@ -28,11 +29,11 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket         = local.bucket_name
-    key            = local.key
+    bucket         = local.kp_backet_remote_state
+    key            = local.kp_key_remote_state
     region         = local.region
     encrypt        = true
-    dynamodb_table = local.lock_table
+    dynamodb_table = local.kp_lock_table_remote_state
   }
 }
 
